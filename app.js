@@ -1,3 +1,11 @@
+const SUPABASE_URL = 'https://gcitjmdiklpjadynwtoa.supabase.co/';
+const SUPABASE_KEY = 'sb_publishable_kZVY1DPvAZ4yoG60EAUNOw_iOCNnssL';
+
+const supabase = window.supabase.createClient(
+  SUPABASE_URL,
+  SUPABASE_KEY
+);
+
 const DEFAULT_PRODUCTS=[["Прайм год","Прайм год",.50,"fixed"],["Прайм мес","Прайм мес — новая подписка",.25,"fixed"],["Прайм мес","Прайм мес — переход с текущей",.20,"fixed"],["Кк","Кредитная карта",.88,"fixed"],["ЗЛС","ЗЛС",null,"zls"],["Зд","СберЗдоровье",.37,"health"],["Зд","Опции 1100",.11,"health_option"],["Зд","Опции 2200",.22,"health_option"],["Право","СберПраво",null,"unknown"],["Колонка","Колонка SberBoom mini",.25,"fixed"],["Тонометр","Тонометр",.15,"fixed"],["Свое дело","«Свое дело»",.22,"fixed"],["ПДС","ПДС",1.02,"fixed"],["ОПС","Внутренний перевод",.43,"fixed"],["ОПС","Внешний перевод",1.20,"fixed"],["Пенс","Перевод пенсии",.62,"fixed"],["Премьер","СберПремьер",.20,"fixed"],["ЮЛ","ИП с QR",1.60,"fixed"],["ЮЛ","ИП без QR",1.30,"fixed"],["ЮЛ","ООО",1.30,"fixed"],["ЮЛ","Зарплатный проект",1.75,"fixed"],["ЮЛ","Регистрация ИП/ООО",.67,"fixed"],["ЮЛ","Токен",.65,"fixed"],["Гч","Госключ",.10,"fixed"],["Сим","Новый номер",.20,"fixed"],["Сим","Переход со своим",.55,"fixed"],["Сим","SIM по заказу",.10,"fixed"],["Обновление тарифа","Обновление тарифа",.25,"fixed"]].map((x,i)=>({id:String(i+1),category:x[0],name:x[1],shortName:x[1],unit_price:x[2],price_rule:x[3],active:true}));
 let products=[],sales=new Map();
 const money=n=>Number(n||0).toFixed(2).replace(".",",");
