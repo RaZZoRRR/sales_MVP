@@ -1,13 +1,13 @@
 const SUPABASE_URL = 'https://gcitjmdiklpjadynwtoa.supabase.co/';
 const SUPABASE_KEY = 'sb_publishable_kZVY1DPvAZ4yoG60EAUNOw_iOCNnssL';
 
-const supabase = window.supabase.createClient(
+const db = window.supabase.createClient(
   SUPABASE_URL,
   SUPABASE_KEY
 );
 
 async function testSupabase() {
-  const { data, error } = await supabase
+  const { data, error } = await db
     .from('products')
     .select('*');
 
