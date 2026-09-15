@@ -18,12 +18,60 @@ async function testSupabase() {
 testSupabase();
 
 const DEFAULT_PRODUCTS=[["Прайм год","Прайм год",.50,"fixed"],["Прайм мес","Прайм мес — новая подписка",.25,"fixed"],["Прайм мес","Прайм мес — переход с текущей",.20,"fixed"],["Кк","Кредитная карта",.88,"fixed"],["ЗЛС","ЗЛС",null,"zls"],["Зд","СберЗдоровье",.37,"health"],["Зд","Опции 1100",.11,"health_option"],["Зд","Опции 2200",.22,"health_option"],["Право","СберПраво",null,"unknown"],["Колонка","Колонка SberBoom mini",.25,"fixed"],["Тонометр","Тонометр",.15,"fixed"],["Свое дело","«Свое дело»",.22,"fixed"],["ПДС","ПДС",1.02,"fixed"],["ОПС","Внутренний перевод",.43,"fixed"],["ОПС","Внешний перевод",1.20,"fixed"],["Пенс","Перевод пенсии",.62,"fixed"],["Премьер","СберПремьер",.20,"fixed"],["ЮЛ","ИП с QR",1.60,"fixed"],["ЮЛ","ИП без QR",1.30,"fixed"],["ЮЛ","ООО",1.30,"fixed"],["ЮЛ","Зарплатный проект",1.75,"fixed"],["ЮЛ","Регистрация ИП/ООО",.67,"fixed"],["ЮЛ","Токен",.65,"fixed"],["Гч","Госключ",.10,"fixed"],["Сим","Новый номер",.20,"fixed"],["Сим","Переход со своим",.55,"fixed"],["Сим","SIM по заказу",.10,"fixed"],["Обновление тарифа","Обновление тарифа",.25,"fixed"]].map((x,i)=>({id:String(i+1),category:x[0],name:x[1],shortName:x[1],unit_price:x[2],price_rule:x[3],active:true}));
+async function loadProducts() {
+  const { data, error } = await db
+    .from('products')
+    .select('*')
+    .eq('status', 'active')
+    .order('id');
+
+  if (error) {
+    console.error('Ошибка загрузки products:', error);
+    products = DEFAULT_PRODUCTS;
+    return;
+  }
+
+  products = data.map(p => ({
+    id: String(p.id),
+    category: p.category,
+    name: p.name,
+    shortName: p.short_name || p.name,
+    unit_price: p.unit_price,
+    price_rule: p.price_rule,
+    active: p.status === 'active'
+  }));
+
+  console.log('Товары из Supabase:', products);
+}
 let products=[],sales=new Map();
 const money=n=>Number(n||0).toFixed(2).replace(".",",");
 function zlsUp(a){if(a<1000)return .08;if(a<3000)return .25;return .35+.10*Math.floor((a-3000)/1000)}
 function groups(ps){return ps.reduce((m,p)=>{(m[p.category]??=[]).push(p);return m},{})}
-function loadProducts(){try{const x=JSON.parse(localStorage.getItem("sales_mvp_products"));products=Array.isArray(x)&&x.length?x:structuredClone(DEFAULT_PRODUCTS)}catch{products=structuredClone(DEFAULT_PRODUCTS)}}
-function saveProducts(){localStorage.setItem("sales_mvp_products",JSON.stringify(products))}
+async function loadProducts(){
+  const { data, error } = await db
+    .from('products')
+    .select('*')
+    .eq('status', 'active')
+    .order('id');
+
+  if (error) {
+    console.error('Ошибка загрузки products:', error);
+    products = structuredClone(DEFAULT_PRODUCTS);
+    return;
+  }
+
+  products = data.map(p => ({
+    id: String(p.id),
+    category: p.category,
+    name: p.name,
+    shortName: p.short_name || p.name,
+    unit_price: p.unit_price,
+    price_rule: p.price_rule,
+    active: p.status === 'active'
+  }));
+
+  console.log('Товары из Supabase:', products);
+}function saveProducts(){localStorage.setItem("sales_mvp_products",JSON.stringify(products))}
 function loadSales(){try{sales=new Map(JSON.parse(localStorage.getItem("sales_mvp_operations")||"[]").map(([id,v])=>[String(id),v]))}catch{sales=new Map()}}
 function saveSales(){localStorage.setItem("sales_mvp_operations",JSON.stringify([...sales]))}
 function addSale(p,amount,up){const v=sales.get(p.id)||{sales:[]};v.sales.push({saleAmount:amount,up:Number(up||0),createdAt:new Date().toISOString()});sales.set(p.id,v);saveSales();renderSales()}
@@ -39,4 +87,8 @@ cancelEdit.onclick=resetForm;
 document.querySelectorAll(".tab").forEach(b=>b.onclick=()=>{document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));b.classList.add("active");salesPage.classList.toggle("hidden",b.dataset.page!=="salesPage");settingsPage.classList.toggle("hidden",b.dataset.page!=="settingsPage");if(b.dataset.page==="settingsPage")renderSettings()});
 settingsBtn.onclick=()=>document.querySelector('[data-page="settingsPage"]').click();
 today.textContent=new Date().toLocaleDateString("ru-RU",{day:"numeric",month:"long",year:"numeric"});
-loadProducts();loadSales();renderSales();
+loadSales();
+
+loadProducts().then(() => {
+  renderSales();
+});
