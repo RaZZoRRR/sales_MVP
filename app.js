@@ -84,6 +84,17 @@ function editProduct(id){const p=products.find(x=>x.id===id);if(!p)return;editId
 function resetForm(){productForm.reset();editId.value="";cancelEdit.classList.add("hidden");rule.value="fixed"}
 productForm.onsubmit=e=>{e.preventDefault();const id=editId.value,p={id:id||crypto.randomUUID(),category:category.value.trim(),name:name.value.trim(),shortName:shortName.value.trim()||name.value.trim(),unit_price:price.value===""?null:Number(price.value),price_rule:rule.value,active:true};products=id?products.map(x=>x.id===id?p:x):[...products,p];saveProducts();resetForm();renderSettings();renderSales()}
 cancelEdit.onclick=resetForm;
+resetSalesBtn.onclick = () => {
+  const ok = confirm(
+    "Сбросить все введённые продажи за сегодня?"
+  );
+
+  if (!ok) return;
+
+  sales = new Map();
+  saveSales();
+  renderSales();
+};
 document.querySelectorAll(".tab").forEach(b=>b.onclick=()=>{document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));b.classList.add("active");salesPage.classList.toggle("hidden",b.dataset.page!=="salesPage");settingsPage.classList.toggle("hidden",b.dataset.page!=="settingsPage");if(b.dataset.page==="settingsPage")renderSettings()});
 settingsBtn.onclick=()=>document.querySelector('[data-page="settingsPage"]').click();
 today.textContent=new Date().toLocaleDateString("ru-RU",{day:"numeric",month:"long",year:"numeric"});
