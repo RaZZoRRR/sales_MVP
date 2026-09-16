@@ -139,6 +139,10 @@ resetSalesBtn.onclick = () => {
   const ok = confirm(
     "Сбросить все введённые продажи за сегодня?"
   );
+  addProductBtn.onclick = () => {
+  resetForm();
+  category.focus();
+  };
 
   if (!ok) return;
 
