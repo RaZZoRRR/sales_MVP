@@ -569,12 +569,9 @@ productForm.onsubmit = async e => {
 
 cancelEdit.onclick = resetForm;
 
-alert("JS дошёл до кнопки Добавить товар");
-
 const addProductBtn = document.querySelector("#addProductBtn");
 
 addProductBtn.addEventListener("click", () => {
-  alert("Кнопка работает");
 
   resetForm();
 
