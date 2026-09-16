@@ -208,6 +208,11 @@ resetSalesBtn.onclick = () => {
   category.focus();
   };
 
+  document.querySelector("#addProductBtn").onclick = () => {
+  resetForm();
+  document.querySelector("#category").focus();
+  };
+
   if (!ok) return;
 
   sales = new Map();
