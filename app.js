@@ -82,8 +82,53 @@ function updateReport(){let qty=0,up=0;sales.forEach(v=>v.sales.forEach(s=>{qty+
 function renderSettings(){const list=document.querySelector("#productList");list.innerHTML="";for(const p of products){const e=document.createElement("div");e.className="admin-item";e.innerHTML=`<div><strong>${p.category} — ${p.name}</strong><div class="admin-meta">${p.unit_price==null?"спец. расчёт":money(p.unit_price)+" УП"} · ${p.price_rule}</div></div><button class="edit-btn">Изменить</button>`;e.querySelector("button").onclick=()=>editProduct(p.id);list.append(e)}}
 function editProduct(id){const p=products.find(x=>x.id===id);if(!p)return;editId.value=p.id;category.value=p.category;name.value=p.name;shortName.value=p.shortName||"";price.value=p.unit_price??"";rule.value=p.price_rule;cancelEdit.classList.remove("hidden");window.scrollTo({top:0,behavior:"smooth"})}
 function resetForm(){productForm.reset();editId.value="";cancelEdit.classList.add("hidden");rule.value="fixed"}
-productForm.onsubmit=e=>{e.preventDefault();const id=editId.value,p={id:id||crypto.randomUUID(),category:category.value.trim(),name:name.value.trim(),shortName:shortName.value.trim()||name.value.trim(),unit_price:price.value===""?null:Number(price.value),price_rule:rule.value,active:true};products=id?products.map(x=>x.id===id?p:x):[...products,p];saveProducts();resetForm();renderSettings();renderSales()}
-cancelEdit.onclick=resetForm;
+productForm.onsubmit = async e => {
+  e.preventDefault();
+
+  const id = editId.value;
+
+  const p = {
+    category: category.value.trim(),
+    name: name.value.trim(),
+    short_name: shortName.value.trim() || name.value.trim(),
+    unit_price: price.value === "" ? null : Number(price.value),
+    price_rule: rule.value,
+    status: "active"
+  };
+
+  if (id) {
+    const { data, error } = await db
+      .from("products")
+      .update(p)
+      .eq("id", Number(id))
+      .select()
+      .single();
+
+    if (error) {
+      console.error("Ошибка сохранения:", error);
+      alert("Не удалось сохранить изменения.");
+      return;
+    }
+
+    products = products.map(x =>
+      x.id === String(data.id)
+        ? {
+            id: String(data.id),
+            category: data.category,
+            name: data.name,
+            shortName: data.short_name || data.name,
+            unit_price: data.unit_price,
+            price_rule: data.price_rule,
+            active: data.status === "active"
+          }
+        : x
+    );
+  }
+
+  resetForm();
+  renderSettings();
+  renderSales();
+};cancelEdit.onclick=resetForm;
 resetSalesBtn.onclick = () => {
   const ok = confirm(
     "Сбросить все введённые продажи за сегодня?"
