@@ -94,12 +94,76 @@ productForm.onsubmit = async e => {
   const ruleValue = document.querySelector("#rule").value;
 
   const p = {
-  category: categoryValue,
-  name: nameValue,
-  short_name: shortNameValue || nameValue,
-  unit_price: priceValue === "" ? null : Number(priceValue),
-  price_rule: ruleValue,
-  status: "active"
+    category: categoryValue,
+    name: nameValue,
+    short_name: shortNameValue || nameValue,
+    unit_price: priceValue === "" ? null : Number(priceValue),
+    price_rule: ruleValue,
+    status: "active"
+  };
+
+  if (id) {
+    // Изменение существующего товара
+    const { data, error } = await db
+      .from("products")
+      .update(p)
+      .eq("id", Number(id))
+      .select()
+      .single();
+
+    if (error) {
+      console.error("Ошибка изменения товара:", error);
+      alert("Не удалось сохранить изменения.");
+      return;
+    }
+
+    products = products.map(x =>
+      x.id === String(data.id)
+        ? {
+            id: String(data.id),
+            category: data.category,
+            name: data.name,
+            shortName: data.short_name || data.name,
+            unit_price: data.unit_price,
+            price_rule: data.price_rule,
+            active: data.status === "active"
+          }
+        : x
+    );
+
+  } else {
+    // Добавление нового товара
+    const code = crypto.randomUUID();
+
+    const { data, error } = await db
+      .from("products")
+      .insert({
+        code: code,
+        ...p
+      })
+      .select()
+      .single();
+
+    if (error) {
+      console.error("Ошибка добавления товара:", error);
+      alert("Не удалось добавить товар.");
+      return;
+    }
+
+    products.push({
+      id: String(data.id),
+      category: data.category,
+      name: data.name,
+      shortName: data.short_name || data.name,
+      unit_price: data.unit_price,
+      price_rule: data.price_rule,
+      active: data.status === "active"
+    });
+  }
+
+  resetForm();
+  renderSettings();
+  renderSales();
 };
 
   if (id) {
