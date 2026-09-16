@@ -87,14 +87,20 @@ productForm.onsubmit = async e => {
 
   const id = editId.value;
 
+  const categoryValue = document.querySelector("#category").value.trim();
+  const nameValue = document.querySelector("#name").value.trim();
+  const shortNameValue = document.querySelector("#shortName").value.trim();
+  const priceValue = document.querySelector("#price").value;
+  const ruleValue = document.querySelector("#rule").value;
+
   const p = {
-    category: category.value.trim(),
-    name: name.value.trim(),
-    short_name: shortName.value.trim() || name.value.trim(),
-    unit_price: price.value === "" ? null : Number(price.value),
-    price_rule: rule.value,
-    status: "active"
-  };
+  category: categoryValue,
+  name: nameValue,
+  short_name: shortNameValue || nameValue,
+  unit_price: priceValue === "" ? null : Number(priceValue),
+  price_rule: ruleValue,
+  status: "active"
+};
 
   if (id) {
     const { data, error } = await db
