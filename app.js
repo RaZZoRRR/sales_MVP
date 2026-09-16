@@ -571,11 +571,15 @@ cancelEdit.onclick = resetForm;
 
 alert("JS дошёл до кнопки Добавить товар");
 
-document.querySelector("#addProductBtn").onclick = () => {
+const addProductBtn = document.querySelector("#addProductBtn");
+
+addProductBtn.addEventListener("click", () => {
   alert("Кнопка работает");
+
   resetForm();
+
   document.querySelector("#category").focus();
-};
+});
 
 document.querySelector("#addProductBtn").onclick = () => {
   resetForm();
